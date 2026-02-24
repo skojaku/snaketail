@@ -1,0 +1,9 @@
+# doctorsnake generated files
+.doctorsnake.conf
+.doctorsnake.log
+.doctorsnake_run.log
+.doctorsnake_last_output.txt
+.doctorsnake_retry_count
+
+# General
+*.log
