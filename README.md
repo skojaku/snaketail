@@ -1,10 +1,10 @@
-# snakerail
+# snaketail
 
 Auto-fix your Snakemake pipeline errors with Claude Code.
 
 ## How It Works
 
-1. Creates a git branch (`snakerail/YYYYMMDD-HHMMSS`)
+1. Creates a git branch (`snaketail/YYYYMMDD-HHMMSS`)
 2. Runs Snakemake; on success prints the healing git log and exits
 3. On error, invokes Claude Code to diagnose, fix, and commit the code
 4. Repeats until the pipeline succeeds or `--max-retries` is hit
@@ -17,9 +17,9 @@ Auto-fix your Snakemake pipeline errors with Claude Code.
 ## Installation
 
 ```bash
-git clone https://github.com/skojaku/snakerail.git
-chmod +x snakerail 
-export PATH="$PATH:<the directory filepath>/snakerail"   # add to ~/.bashrc or ~/.zshrc
+git clone https://github.com/skojaku/snaketail.git
+chmod +x snaketail 
+export PATH="$PATH:<the directory filepath>/snaketail"   # add to ~/.bashrc or ~/.zshrc
 ```
 
 Run the script from your Snakemake project root (where your `Snakefile` lives).
@@ -29,13 +29,13 @@ Run the script from your Snakemake project root (where your `Snakefile` lives).
 ```bash
 cd /path/to/your/snakemake/project
 
-snakerail                          # run with defaults
-snakerail --cores 4 -p             # pass flags to snakemake
-snakerail --max-retries 5          # limit fix attempts
-snakerail --branch my-experiment   # custom branch name
+snaketail                          # run with defaults
+snaketail --cores 4 -p             # pass flags to snakemake
+snaketail --max-retries 5          # limit fix attempts
+snaketail --branch my-experiment   # custom branch name
 ```
 
-`--max-retries` and `--branch` are snakerail flags; everything else is forwarded to Snakemake.
+`--max-retries` and `--branch` are snaketail flags; everything else is forwarded to Snakemake.
 
 ## Tips
 
