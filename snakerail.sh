@@ -20,16 +20,22 @@ RUN_LOG="$SCRIPT_DIR/.snakerail_run.log"
 SNAKEMAKE_CMD="snakemake --cores all --rerun-incomplete"
 MAX_RETRIES=10
 BRANCH="snakerail/$(date '+%Y%m%d-%H%M%S')"
+EXTRA_ARGS=()
 
-# Parse CLI arguments
+# Parse CLI arguments; unknown flags/args are forwarded to snakemake
 while [ $# -gt 0 ]; do
     case "$1" in
         --cmd)         SNAKEMAKE_CMD="$2"; shift 2 ;;
         --max-retries) MAX_RETRIES="$2";   shift 2 ;;
         --branch)      BRANCH="$2";        shift 2 ;;
-        *) echo "Unknown flag: $1"; exit 1 ;;
+        *)             EXTRA_ARGS+=("$1"); shift ;;
     esac
 done
+
+# Append any extra args to the snakemake command
+if [ ${#EXTRA_ARGS[@]} -gt 0 ]; then
+    SNAKEMAKE_CMD="$SNAKEMAKE_CMD ${EXTRA_ARGS[*]}"
+fi
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG"; }
 
