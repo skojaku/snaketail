@@ -36,15 +36,14 @@ $error" \
 # ── main ──────────────────────────────────────────────────────────────────────
 cd "$DIR"
 current=$(git branch --show-current 2>/dev/null)
-if [[ "$current" == "main" || "$current" == "master" ]]; then
+if [[ "$current" != snakerail/* ]]; then
   git checkout -b "$BRANCH"
-  echo "Starting on branch $BRANCH"
-else
-  echo "Starting on branch $current"
+  current="$BRANCH"
 fi
+echo "Starting on branch $current"
 
 for attempt in $(seq 1 $MAX_RETRIES); do
-  run_snakemake && { echo "Pipeline complete."; git log --oneline "$BRANCH"; exit 0; }
+  run_snakemake && { echo "Pipeline complete."; git log --oneline "$current"; exit 0; }
   echo "Attempt $attempt/$MAX_RETRIES failed — healing..."
   heal
 done
