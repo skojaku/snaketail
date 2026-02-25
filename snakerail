@@ -4,7 +4,7 @@
 set -uo pipefail
 
 CHILD_PID=""
-trap 'echo "Interrupted."; [ -n "$CHILD_PID" ] && kill "$CHILD_PID" 2>/dev/null; exit 1' INT TERM
+trap 'echo "Interrupted."; [ -n "$CHILD_PID" ] && kill -9 "$CHILD_PID" 2>/dev/null; exit 1' INT TERM
 
 DIR="$PWD"
 MAX_RETRIES=10
@@ -35,7 +35,8 @@ Project: $DIR
 
 $error" \
     --allowedTools "Bash,Read,Edit,Write,Grep,Glob,WebFetch,WebSearch" \
-    --dangerously-skip-permissions
+    --dangerously-skip-permissions & CHILD_PID=$!
+  wait "$CHILD_PID"; CHILD_PID=""
 }
 
 # ── main ──────────────────────────────────────────────────────────────────────
