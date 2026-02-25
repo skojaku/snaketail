@@ -5,7 +5,6 @@ set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG="$DIR/.snakerail.log"
-RUN_LOG="$DIR/.snakerail_run.log"
 MAX_RETRIES=10
 BRANCH="snakerail/$(date '+%Y%m%d-%H%M%S')"
 PASS=()
@@ -21,23 +20,15 @@ done
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 
 run_snakemake() {
-  snakemake --unlock 2>/dev/null || true
-  snakemake --cores all --rerun-incomplete "${PASS[@]}" 2>&1 | tee "$RUN_LOG"
+  snakemake --unlock 2>/dev/null; snakemake --cores all --rerun-incomplete "${PASS[@]}" 2>&1 | tee "$DIR/.snakerail_run.log"
   return ${PIPESTATUS[0]}
 }
 
-extract_error() {
-  local error
-  error=$(grep -E "Error|Traceback" "$RUN_LOG" -B3 -A10 2>/dev/null | tail -60)
-  [ -z "$error" ] && error=$(tail -60 "$RUN_LOG")
-  echo "$error"
-}
-
 heal() {
-  local attempt=$1 error=$2
-  log "Attempt $attempt — invoking Claude Code to fix..."
-  claude -p "Fix the Snakemake error below. Edit the code so it won't recur. Do not restart Snakemake.
-When done, git add and commit your changes with a descriptive message.
+  local error
+  error=$(grep -E "Error|Traceback" "$DIR/.snakerail_run.log" -B3 -A10 2>/dev/null | tail -60)
+  [ -z "$error" ] && error=$(tail -60 "$DIR/.snakerail_run.log")
+  claude -p "Fix the Snakemake error below. Edit the code, then git add and commit. Do not restart Snakemake.
 Project: $DIR
 
 $error" \
@@ -51,16 +42,11 @@ cd "$DIR"
 git checkout -b "$BRANCH" 2>/dev/null || true
 log "Starting on branch $BRANCH"
 
-attempt=0
-while true; do
-  if run_snakemake; then
-    log "Pipeline complete."
-    git log --oneline "$BRANCH" 2>/dev/null
-    exit 0
-  fi
-
-  attempt=$((attempt + 1))
-  [ $attempt -gt $MAX_RETRIES ] && { log "Giving up after $MAX_RETRIES attempts."; exit 1; }
-
-  heal "$attempt" "$(extract_error)"
+for attempt in $(seq 1 $MAX_RETRIES); do
+  run_snakemake && { log "Pipeline complete."; git log --oneline "$BRANCH"; exit 0; }
+  log "Attempt $attempt/$MAX_RETRIES failed — healing..."
+  heal
 done
+
+log "Giving up after $MAX_RETRIES attempts."
+exit 1
