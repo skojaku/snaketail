@@ -30,7 +30,7 @@ heal() {
   local error
   error=$(grep -E "Error|Traceback" "$DIR/.snakerail_run.log" -B3 -A10 2>/dev/null | tail -60)
   [ -z "$error" ] && error=$(tail -60 "$DIR/.snakerail_run.log")
-  claude "Fix the Snakemake error below. Edit the code, then git add and commit. Do not restart Snakemake.
+  claude -p "Fix the Snakemake error below. Edit the code, then git add and commit. Do not restart Snakemake.
 Project: $DIR
 
 $error" \
