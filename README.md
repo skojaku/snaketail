@@ -22,15 +22,17 @@ chmod +x snakerail
 export PATH="$PATH:<the directory filepath>/snakerail"   # add to ~/.bashrc or ~/.zshrc
 ```
 
-The script must live in the root of your Snakemake project (next to your `Snakefile`).
+Run the script from your Snakemake project root (where your `Snakefile` lives).
 
 ## Usage
 
 ```bash
-./snakerail                          # run with defaults
-./snakerail --cores 4 -p             # pass flags to snakemake
-./snakerail --max-retries 5          # limit fix attempts
-./snakerail --branch my-experiment   # custom branch name
+cd /path/to/your/snakemake/project
+
+snakerail                          # run with defaults
+snakerail --cores 4 -p             # pass flags to snakemake
+snakerail --max-retries 5          # limit fix attempts
+snakerail --branch my-experiment   # custom branch name
 ```
 
 `--max-retries` and `--branch` are snakerail flags; everything else is forwarded to Snakemake.

@@ -3,7 +3,7 @@
 # Usage: ./snakerail.sh [--max-retries N] [--branch NAME] [snakemake args...]
 set -uo pipefail
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
+DIR="$PWD"
 MAX_RETRIES=10
 BRANCH="snakerail/$(date '+%Y%m%d-%H%M%S')"
 PASS=()
