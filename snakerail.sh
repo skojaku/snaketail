@@ -4,7 +4,6 @@
 set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-LOG="$DIR/.snakerail.log"
 MAX_RETRIES=10
 BRANCH="snakerail/$(date '+%Y%m%d-%H%M%S')"
 PASS=()
@@ -16,8 +15,6 @@ while [ $# -gt 0 ]; do
     *)             PASS+=("$1");     shift ;;
   esac
 done
-
-log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 
 run_snakemake() {
   snakemake --unlock 2>/dev/null; snakemake --cores all --rerun-incomplete "${PASS[@]}" 2>&1 | tee "$DIR/.snakerail_run.log"
@@ -33,20 +30,19 @@ Project: $DIR
 
 $error" \
     --allowedTools "Bash,Read,Edit,Write,Grep,Glob,WebFetch,WebSearch" \
-    --dangerously-skip-permissions >> "$LOG" 2>&1
-  git log --oneline -3 | tee -a "$LOG"
+    --dangerously-skip-permissions
 }
 
 # ── main ──────────────────────────────────────────────────────────────────────
 cd "$DIR"
 git checkout -b "$BRANCH" 2>/dev/null || true
-log "Starting on branch $BRANCH"
+echo "Starting on branch $BRANCH"
 
 for attempt in $(seq 1 $MAX_RETRIES); do
-  run_snakemake && { log "Pipeline complete."; git log --oneline "$BRANCH"; exit 0; }
-  log "Attempt $attempt/$MAX_RETRIES failed — healing..."
+  run_snakemake && { echo "Pipeline complete."; git log --oneline "$BRANCH"; exit 0; }
+  echo "Attempt $attempt/$MAX_RETRIES failed — healing..."
   heal
 done
 
-log "Giving up after $MAX_RETRIES attempts."
+echo "Giving up after $MAX_RETRIES attempts."
 exit 1
