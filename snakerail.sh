@@ -46,15 +46,12 @@ for attempt in $(seq 1 $((MAX_RETRIES + 1))); do
   [ -z "$ERROR" ] && ERROR=$(tail -60 "$RUN_LOG")
 
   claude -p "Fix the Snakemake error below. Edit the code so it won't recur. Do not restart Snakemake.
+When done, git add and commit your changes with a descriptive message.
 Project: $DIR
 
 $ERROR" \
     --allowedTools "Bash,Read,Edit,Write,Grep,Glob,WebFetch,WebSearch" \
     --dangerously-skip-permissions >> "$LOG" 2>&1
 
-  if ! git diff --quiet 2>/dev/null; then
-    git add -A
-    git commit -m "snakerail: fix attempt $attempt" >> "$LOG"
-    git log --oneline -3 | tee -a "$LOG"
-  fi
+  git log --oneline -3 | tee -a "$LOG"
 done
