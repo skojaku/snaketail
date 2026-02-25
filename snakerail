@@ -2,6 +2,7 @@
 # snakerail — run Snakemake, auto-fix errors with Claude Code, repeat until done
 # Usage: ./snakerail.sh [--max-retries N] [--branch NAME] [snakemake args...]
 set -uo pipefail
+trap 'echo "Interrupted."; exit 1' INT TERM
 
 DIR="$PWD"
 MAX_RETRIES=10
